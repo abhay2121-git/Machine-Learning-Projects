@@ -1,198 +1,169 @@
 """
-Model evaluation and visualization utilities for house price prediction.
+Model Performance Visualization module for house price prediction.
+Contains functions for creating comprehensive model evaluation plots.
 """
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import confusion_matrix, classification_report
-from typing import List, Optional
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+from typing import Dict, Any, List, Optional
+
+from evaluate import evaluate_model
 
 
-def plot_predictions_vs_actual(y_true: np.ndarray, y_pred: np.ndarray, 
-                             figsize: tuple = (10, 6)) -> None:
+def plot_learning_curves(model: Any, X_train: pd.DataFrame, y_train: pd.Series, 
+                        X_val: pd.DataFrame, y_val: pd.Series) -> None:
     """
-    Plot predictions vs actual values.
+    Plot learning curves to analyze model performance.
     
     Args:
-        y_true: True values
-        y_pred: Predicted values
-        figsize: Figure size
+        model: Trained model
+        X_train: Training features
+        y_train: Training targets
+        X_val: Validation features
+        y_val: Validation targets
     """
-    plt.figure(figsize=figsize)
+    from sklearn.model_selection import learning_curve
     
-    # Scatter plot
-    plt.scatter(y_true, y_pred, alpha=0.6, label='Predictions')
+    train_sizes, train_scores, val_scores = learning_curve(
+        model, X_train, y_train, cv=5, 
+        scoring='neg_mean_squared_error',
+        train_sizes=np.linspace(0.1, 1.0, 5)
+    )
     
-    # Perfect prediction line
-    min_val, max_val = min(y_true.min(), y_pred.min()), max(y_true.max(), y_pred.max())
-    plt.plot([min_val, max_val], [min_val, max_val], 'r--', lw=2, label='Perfect Prediction')
+    # Calculate mean and std
+    train_mean = -np.mean(train_scores, axis=1)
+    train_std = np.std(train_scores, axis=1)
+    val_mean = -np.mean(val_scores, axis=1)
+    val_std = np.std(val_scores, axis=1)
     
-    plt.xlabel('Actual Values')
-    plt.ylabel('Predicted Values')
-    plt.title('Predictions vs Actual Values')
+    plt.figure(figsize=(12, 8))
+    
+    plt.plot(train_sizes, train_mean, 'o-', color='blue', label='Training Score')
+    plt.plot(train_sizes, val_mean, 'o-', color='red', label='Validation Score')
+    
+    plt.fill_between(train_sizes, train_mean - train_std, 
+                     train_mean + train_std, alpha=0.1, color='blue')
+    plt.fill_between(train_sizes, val_mean - val_std, 
+                     val_mean + val_std, alpha=0.1, color='red')
+    
+    plt.xlabel('Training Set Size')
+    plt.ylabel('Negative Mean Squared Error')
+    plt.title('Learning Curves')
     plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
+    plt.grid(True)
     plt.show()
 
 
-def plot_residuals(y_true: np.ndarray, y_pred: np.ndarray, 
-                  figsize: tuple = (15, 5)) -> None:
+def plot_residual_analysis(y_true: pd.Series, y_pred: pd.Series) -> None:
     """
-    Plot residual analysis.
+    Analyze model residuals for assumptions checking.
     
     Args:
-        y_true: True values
+        y_true: True target values
         y_pred: Predicted values
-        figsize: Figure size
     """
     residuals = y_true - y_pred
     
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=figsize)
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    fig.suptitle('Residual Analysis', fontsize=16, fontweight='bold')
     
     # Residuals vs Predicted
-    ax1.scatter(y_pred, residuals, alpha=0.6)
-    ax1.axhline(y=0, color='r', linestyle='--')
-    ax1.set_xlabel('Predicted Values')
-    ax1.set_ylabel('Residuals')
-    ax1.set_title('Residuals vs Predicted')
-    ax1.grid(True, alpha=0.3)
-    
-    # Residuals histogram
-    ax2.hist(residuals, bins=30, alpha=0.7, edgecolor='black')
-    ax2.set_xlabel('Residuals')
-    ax2.set_ylabel('Frequency')
-    ax2.set_title('Residuals Distribution')
-    ax2.grid(True, alpha=0.3)
+    axes[0].scatter(y_pred, residuals, alpha=0.6)
+    axes[0].axhline(y=0, color='r', linestyle='--', lw=2)
+    axes[0].set_xlabel('Predicted Price ($100k)')
+    axes[0].set_ylabel('Residuals')
+    axes[0].set_title('Residuals vs Predicted')
+    axes[0].grid(True, alpha=0.3)
     
     # Q-Q plot
     from scipy import stats
-    stats.probplot(residuals, dist="norm", plot=ax3)
-    ax3.set_title('Q-Q Plot')
-    ax3.grid(True, alpha=0.3)
+    stats.probplot(residuals, dist="norm", plot=axes[1])
+    axes[1].set_title('Q-Q Plot')
+    axes[1].grid(True, alpha=0.3)
     
     plt.tight_layout()
     plt.show()
 
 
-def plot_feature_importance(importance_df: pd.DataFrame, top_n: int = 15, 
-                          figsize: tuple = (10, 8)) -> None:
+def plot_feature_importance(model: Any, feature_names: List[str]) -> None:
     """
-    Plot feature importance.
+    Create feature importance visualization.
     
     Args:
-        importance_df: DataFrame with feature importance
-        top_n: Number of top features to show
-        figsize: Figure size
+        model: Trained model
+        feature_names: List of feature names
     """
-    if importance_df.empty:
-        print("No feature importance data available!")
-        return
+    # Get feature importance
+    importances = np.abs(model.coef_)
+    feature_importance_df = pd.DataFrame({
+        'Feature': feature_names,
+        'Importance': importances
+    }).sort_values('Importance', ascending=True)
     
-    # Get top features
-    top_features = importance_df.head(top_n)
+    plt.figure(figsize=(10, 6))
+    plt.barh(feature_importance_df['Feature'], feature_importance_df['Importance'], 
+                color='steelblue', edgecolor='black')
     
-    plt.figure(figsize=figsize)
-    sns.barplot(data=top_features, x='importance', y='feature')
-    plt.title(f'Top {top_n} Feature Importance')
-    plt.xlabel('Importance')
-    plt.ylabel('Features')
+    plt.xlabel('Absolute Coefficient Value')
+    plt.title('Feature Importance')
+    plt.grid(True, alpha=0.3, axis='x')
+    
+    # Add importance values as text
+    for i, (idx, row) in enumerate(feature_importance_df.itertuples()):
+        plt.text(row['Importance'] * 1.05, i, row['Feature'], 
+                f'{row["Importance"]:.3f}', fontsize=9, va='center')
+    
     plt.tight_layout()
     plt.show()
 
 
-def plot_learning_curves(train_scores: List[float], val_scores: List[float], 
-                        epochs: Optional[List[int]] = None, 
-                        figsize: tuple = (10, 6)) -> None:
+def plot_model_comparison(models: Dict[str, Any], X_test: pd.DataFrame, y_test: pd.Series) -> None:
     """
-    Plot learning curves.
+    Compare multiple models side by side.
     
     Args:
-        train_scores: Training scores
-        val_scores: Validation scores
-        epochs: Epoch numbers (optional)
-        figsize: Figure size
+        models: Dictionary of model names and trained models
+        X_test: Test features
+        y_test: Test targets
     """
-    if epochs is None:
-        epochs = range(1, len(train_scores) + 1)
+    fig, axes = plt.subplots(1, len(models), figsize=(15, 6))
+    fig.suptitle('Model Comparison', fontsize=16, fontweight='bold')
     
-    plt.figure(figsize=figsize)
-    plt.plot(epochs, train_scores, 'b-', label='Training Score')
-    plt.plot(epochs, val_scores, 'r-', label='Validation Score')
-    plt.xlabel('Epochs')
-    plt.ylabel('Score')
-    plt.title('Learning Curves')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
+    metrics = {}
+    
+    for i, (name, model) in enumerate(models.items()):
+        y_pred = model.predict(X_test)
+        
+        # Calculate metrics
+        r2 = r2_score(y_test, y_pred)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+        mae = mean_absolute_error(y_test, y_pred)
+        
+        metrics[name] = {'R2': r2, 'RMSE': rmse, 'MAE': mae}
+        
+        # Create subplot
+        ax = axes[i]
+        
+        # Scatter plot
+        ax.scatter(y_test, y_pred, alpha=0.6, s=20, edgecolors='k', linewidths=0.5)
+        min_val = min(y_test.min(), y_pred.min())
+        max_val = max(y_test.max(), y_pred.max())
+        ax.plot([min_val, max_val], [min_val, max_val], 'r--', lw=2, label='Perfect Prediction')
+        
+        ax.set_xlabel('Actual Price ($100k)')
+        ax.set_ylabel('Predicted Price ($100k)')
+        ax.set_title(f'{name} (R²: {r2:.3f})')
+        ax.grid(True, alpha=0.3)
+        
+        # Add metrics text
+        metrics_text = f"R²: {r2:.3f}\\nRMSE: {rmse:.2f}\\nMAE: {mae:.2f}"
+        ax.text(0.05, 0.95, metrics_text, fontsize=8, 
+                bbox=dict(boxstyle="round,pad=0.5", facecolor='white', alpha=0.8))
+    
     plt.tight_layout()
     plt.show()
-
-
-def plot_model_comparison(models_metrics: dict, metric: str = 'r2', 
-                         figsize: tuple = (10, 6)) -> None:
-    """
-    Plot comparison of multiple models.
     
-    Args:
-        models_metrics: Dictionary of model metrics
-        metric: Metric to compare
-        figsize: Figure size
-    """
-    model_names = list(models_metrics.keys())
-    metric_values = [models_metrics[model][metric] for model in model_names]
-    
-    plt.figure(figsize=figsize)
-    bars = plt.bar(model_names, metric_values, alpha=0.7)
-    
-    # Add value labels on bars
-    for bar, value in zip(bars, metric_values):
-        plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
-                f'{value:.4f}', ha='center', va='bottom')
-    
-    plt.xlabel('Models')
-    plt.ylabel(metric.upper())
-    plt.title(f'Model Comparison - {metric.upper()}')
-    plt.xticks(rotation=45)
-    plt.grid(True, alpha=0.3, axis='y')
-    plt.tight_layout()
-    plt.show()
-
-
-def plot_prediction_intervals(y_true: np.ndarray, y_pred: np.ndarray, 
-                            y_pred_lower: np.ndarray, y_pred_upper: np.ndarray,
-                            figsize: tuple = (12, 6)) -> None:
-    """
-    Plot predictions with confidence intervals.
-    
-    Args:
-        y_true: True values
-        y_pred: Predicted values
-        y_pred_lower: Lower bound of predictions
-        y_pred_upper: Upper bound of predictions
-        figsize: Figure size
-    """
-    plt.figure(figsize=figsize)
-    
-    # Sort by actual values for better visualization
-    sort_idx = np.argsort(y_true)
-    
-    x = range(len(y_true))
-    plt.plot(x, y_true[sort_idx], 'b-', label='Actual', alpha=0.7)
-    plt.plot(x, y_pred[sort_idx], 'r-', label='Predicted', alpha=0.7)
-    plt.fill_between(x, y_pred_lower[sort_idx], y_pred_upper[sort_idx], 
-                     alpha=0.3, color='red', label='Confidence Interval')
-    
-    plt.xlabel('Sample Index (sorted by actual value)')
-    plt.ylabel('Values')
-    plt.title('Predictions with Confidence Intervals')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.show()
-
-
-if __name__ == "__main__":
-    # Example usage
-    print("Model plotting utilities loaded successfully!")
+    return metrics

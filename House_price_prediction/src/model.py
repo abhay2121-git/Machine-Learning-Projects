@@ -112,7 +112,7 @@ class CaliforniaHousePricePredictor:
         print(f"    - Alpha (regularization): {self.alpha}")
         print(f"    - L1 ratio: {self.l1_ratio}")
         print(f"    - L1 (Lasso) weight: {self.l1_ratio * 100:.0f}%")
-        print(f"    - L2 (Ridge) weight: {(1 - self.l1_ratio) * 100:.0f}%")
+        print(f"    - L2 (Ridge) weight: {(1-self.l1_ratio) * 100:.0f}%")
         
         self.model.fit(self.X_train_scaled, self.y_train)
         
@@ -154,6 +154,7 @@ class CaliforniaHousePricePredictor:
         print(f"{'R² Score':<20} {train_r2:<15.4f} {test_r2:<15.4f}")
         print(f"{'RMSE ($100k)':<20} {train_rmse:<15.4f} {test_rmse:<15.4f}")
         print(f"{'MAE ($100k)':<20} {train_mae:<15.4f} {test_mae:<15.4f}")
+        print("-"*50)
         
         # Sample predictions
         print(f"\n\nSample Predictions (first 10 test samples):")
@@ -167,96 +168,6 @@ class CaliforniaHousePricePredictor:
         print()
         
         return test_r2, test_rmse, test_mae
-    
-    def load_user_config(self, config_file='user_config.json'):
-        """
-        Load user configuration from JSON file.
-        
-        Args:
-            config_file: Path to configuration file
-            
-        Returns:
-            Dictionary with user configuration
-        """
-        import json
-        import os
-        
-        if os.path.exists(config_file):
-            with open(config_file, 'r') as f:
-                return json.load(f)
-        else:
-            # Default configuration
-            return {
-                'medinc': 8.5,
-                'houseage': 35.0,
-                'avelrooms': 4.0,
-                'avebedrms': 1.5,
-                'population': 800,
-                'aveoccup': 2.5,
-                'latitude': 37.8,
-                'longitude': -122.4
-            }
-    
-    def save_user_config(self, config_data, config_file='user_config.json'):
-        """
-        Save user configuration to JSON file.
-        
-        Args:
-            config_data: Dictionary with user configuration
-            config_file: Path to save configuration
-        """
-        import json
-        
-        with open(config_file, 'w') as f:
-            json.dump(config_data, f, indent=4)
-        
-        print(f"Configuration saved to {config_file}")
-    
-    def predict_with_user_config(self, config_file='user_config.json'):
-        """
-        Predict using user configuration file.
-        
-        Args:
-            config_file: Path to configuration file
-        """
-        config = self.load_user_config(config_file)
-        
-        print(f"\n{'='*70}")
-        print(f"USER CONFIGURATION PREDICTION")
-        print(f"{'='*70}")
-        print(f"Using configuration from: {config_file}")
-        print(f"Input Features:")
-        print(f"  Median Income: ${config['medinc']:.2f}k")
-        print(f"  House Age: {config['houseage']} years")
-        print(f"  Average Rooms: {config['avelrooms']}")
-        print(f"  Average Bedrooms: {config['avebedrms']}")
-        print(f"  Population: {config['population']}")
-        print(f"  Average Occupancy: {config['aveoccup']}")
-        print(f"  Location: ({config['latitude']}, {config['longitude']})")
-        
-        # Create input array
-        features = {
-            'MedInc': config['medinc'],
-            'HouseAge': config['houseage'],
-            'AveRooms': config['avelrooms'],
-            'AveBedrms': config['avebedrms'],
-            'Population': config['population'],
-            'AveOccup': config['aveoccup'],
-            'Latitude': config['latitude'],
-            'Longitude': config['longitude']
-        }
-        
-        input_df = pd.DataFrame([features])
-        input_scaled = self.scaler.transform(input_df)
-        
-        # Predict
-        prediction = self.model.predict(input_scaled)[0]
-        
-        print(f"\nPredicted Price: ${prediction * 100000:,.2f}")
-        print(f"                 (${prediction:.2f} in $100k)")
-        print(f"{'='*70}\n")
-        
-        return prediction
     
     def predict_sample_house(self, medinc=5.0, houseage=25.0, avelrooms=4.5, 
                           avebedrms=1.2, population=500, aveoccup=2.0,
@@ -311,7 +222,99 @@ class CaliforniaHousePricePredictor:
         print(f"{'='*70}\n")
         
         return prediction
+    
+    def load_user_config(self, config_file='user_config.json'):
+        """
+        Load user configuration from JSON file.
         
+        Args:
+            config_file: Path to configuration file
+            
+        Returns:
+            Dictionary with user configuration
+        """
+        import json
+        import os
+        
+        if os.path.exists(config_file):
+            with open(config_file, 'r') as f:
+                return json.load(f)
+        else:
+            # Default configuration
+            return {
+                'medinc': 8.5,
+                'houseage': 35.0,
+                'avelrooms': 4.0,
+                'avebedrms': 1.5,
+                'population': 600,
+                'aveoccup': 2.2,
+                'latitude': 38.5,
+                'longitude': -121.0
+            }
+    
+    def save_user_config(self, config_data, config_file='user_config.json'):
+        """
+        Save user configuration to JSON file.
+        
+        Args:
+            config_data: Dictionary with user configuration
+            config_file: Path to save configuration
+        
+        """
+        import json
+        
+        with open(config_file, 'w') as f:
+            json.dump(config_data, f, indent=4)
+        
+        print(f"Configuration saved to {config_file}")
+    
+    def predict_with_user_config(self, config_file='user_config.json'):
+        """
+        Predict using user configuration file.
+        
+        Args:
+            config_file: Path to configuration file
+        """
+        config = self.load_user_config(config_file)
+        
+        print(f"\n{'='*70}")
+        print(f"USER CONFIGURATION PREDICTION")
+        print(f"{'='*70}")
+        print(f"Using configuration from: {config_file}")
+        print(f"Input Features:")
+        print(f"  Median Income: ${config['medinc']:.2f}k")
+        print(f"  House Age: {config['houseage']} years")
+        print(f"  Average Rooms: {config['avelrooms']}")
+        print(f"  Average Bedrooms: {config['avebedrms']}")
+        print(f"  Population: {config['population']}")
+        print(f"  Average Occupancy: {config['aveoccup']}")
+        print(f"  Location: ({config['latitude']}, {config['longitude']})")
+        
+        # Create input array
+        features = {
+            'MedInc': config['medinc'],
+            'HouseAge': config['houseage'],
+            'AveRooms': config['avelrooms'],
+            'AveBedrms': config['avebedrms'],
+            'Population': config['population'],
+            'AveOccup': config['aveoccup'],
+            'Latitude': config['latitude'],
+            'Longitude': config['longitude']
+        }
+        
+        input_df = pd.DataFrame([features])
+        input_scaled = self.scaler.transform(input_df)
+        
+        # Predict
+        prediction = self.model.predict(input_scaled)[0]
+        
+        print(f"\nPredicted Price: ${prediction * 100000:,.2f}")
+        print(f"                 (${prediction:.2f} in $100k)")
+        print(f"{'='*70}\n")
+        
+        return prediction
+    
+    def predict_custom(self):
         """Interactive price prediction with error handling"""
         print("="*70)
         print("CUSTOM HOUSE PRICE PREDICTION")
@@ -472,36 +475,75 @@ def main():
     print("ElasticNet Regression Model")
     print("="*70 + "\n")
     
-    # Initialize predictor
-    predictor = CaliforniaHousePricePredictor(alpha=0.1, l1_ratio=0.5)
+    try:
+        # Initialize predictor
+        predictor = CaliforniaHousePricePredictor(alpha=0.1, l1_ratio=0.5)
+        
+        # Display dataset information
+        predictor.explore_data()
+        
+        # Preprocess data
+        predictor.split_and_preprocess()
+        
+        # Train model
+        predictor.train_model()
+        
+        # Evaluate model
+        predictor.evaluate_model()
+        
+        # Visualize results
+        predictor.visualize_results()
+        
+        # Interactive user input prediction
+        print("\n" + "="*70)
+        print("Would you like to enter your own house values? (y/n): ")
+        
+        try:
+            choice = input().strip().lower()
+            
+            if choice == 'y':
+                print("\n" + "="*70)
+                print("ENTER YOUR HOUSE VALUES")
+                print("="*70)
+                
+                # Get user input for each feature
+                medinc = float(input("Median Income (in $10k, e.g., 8.5 for $85k): "))
+                houseage = float(input("House Age (in years): "))
+                avelrooms = float(input("Average Rooms per household: "))
+                avebedrms = float(input("Average Bedrooms per household: "))
+                population = float(input("Block Population: "))
+                aveoccup = float(input("Average Occupancy per household: "))
+                latitude = float(input("Latitude (e.g., 37.8 for SF): "))
+                longitude = float(input("Longitude (e.g., -122.4 for SF): "))
+                
+                # Predict with user values
+                predictor.predict_sample_house(
+                    medinc=medinc, houseage=houseage, avelrooms=avelrooms,
+                    avebedrms=avebedrms, population=population, aveoccup=aveoccup,
+                    latitude=latitude, longitude=longitude
+                )
+            else:
+                print("Using default sample values above.")
+                
+        except (EOFError, KeyboardInterrupt):
+            print("\nUsing default sample values above.")
+        except ValueError:
+            print("\nInvalid input! Please enter valid numbers. Using default sample values above.")
+        except Exception as e:
+            print(f"Input error: {str(e)}. Using default sample values above.")
+        
+        print("\n" + "="*70)
+        print("ANALYSIS COMPLETE!")
+        print("="*70 + "\n")
+        
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")
+        print("Please check your environment and dependencies.")
+        return 1
     
-    # Explore dataset
-    predictor.explore_data()
-    
-    # Preprocess
-    predictor.split_and_preprocess()
-    
-    # Train
-    predictor.train_model()
-    
-    # Evaluate
-    predictor.evaluate_model()
-    
-    # Visualize
-    predictor.visualize_results()
-    
-    # Interactive prediction
-    while True:
-        choice = input("\nWould you like to predict a custom house price? (y/n): ").lower()
-        if choice == 'y':
-            predictor.predict_custom()
-        else:
-            break
-    
-    print("\n" + "="*70)
-    print("ANALYSIS COMPLETE!")
-    print("="*70 + "\n")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    exit_code = main()
+    sys.exit(exit_code)

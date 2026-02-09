@@ -1,79 +1,110 @@
 """
-Training script for house price prediction.
-Orchestrates the complete training pipeline.
+Training module for house price prediction.
+Contains functions for model training and artifact management.
 """
 
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-from joblib import dump, load
 import os
+from joblib import dump, load
+from sklearn.linear_model import ElasticNet
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from typing import Dict, Any, Tuple, Optional
 
-from data_loader import load_data, inspect_data
+from data_loader import load_data
 from preprocessing import handle_missing_values, encode_categorical_features, scale_features
-from model import HousePriceModel
-from src.data_loader import load_data, inspect_data
 
-def train_model(data_path: str, target_column: str, model_type: str = 'linear', 
-                test_size: float = 0.2, random_state: int = 42) -> dict:
+
+def train_model(X: pd.DataFrame, y: pd.Series, alpha: float = 0.1, 
+                l1_ratio: float = 0.5, test_size: float = 0.2, 
+                random_state: int = 42, model_save_path: str = 'artifacts/model.joblib') -> Tuple[ElasticNet, Any]:
     """
-    Complete training pipeline.
+    Train ElasticNet regression model and save artifacts.
     
     Args:
-        data_path: Path to the dataset
-        target_column: Name of target column
-        model_type: Type of model to train
+        X: Feature DataFrame
+        y: Target Series
+        alpha: Regularization strength
+        l1_ratio: Mix between L1 and L2 regularization
         test_size: Proportion of data for testing
-        random_state: Random seed
+        random_state: Random seed for reproducibility
+        model_save_path: Path to save trained model
         
     Returns:
-        Dictionary with training results
+        Tuple of (trained_model, scaler)
     """
-    # Load data
-    df = load_data(data_path)
+    print(f"\nTraining ElasticNet Regression...")
+    print(f"  Hyperparameters:")
+    print(f"    - Alpha (regularization): {alpha}")
+    print(f"    - L1 ratio: {l1_ratio}")
+    print(f"    - L1 (Lasso) weight: {l1_ratio * 100:.0f}%")
+    print(f"    - L2 (Ridge) weight: {(1-l1_ratio) * 100:.0f}%")
     
-    # Preprocessing
-    df_clean = handle_missing_values(df)
-    df_encoded = encode_categorical_features(df_clean)
+    # Handle missing values
+    X = handle_missing_values(X, strategy='mean')
     
-    # Split features and target
-    X = df_encoded.drop(columns=[target_column])
-    y = df_encoded[target_column]
+    # Encode categorical features if any
+    categorical_columns = X.select_dtypes(include=['object']).columns.tolist()
+    if categorical_columns:
+        X = encode_categorical_features(X, categorical_columns)
     
     # Scale features
-    X_scaled, scaler = scale_features(pd.concat([X, y], axis=1), target_column)
-    X_scaled = X_scaled.drop(columns=[target_column])
+    numerical_columns = X.select_dtypes(include=[np.number]).columns.tolist()
+    X_scaled, scaler = scale_features(X, numerical_columns)
     
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(
-        X_scaled, y, test_size=test_size, random_state=random_state
+        X, y, test_size=test_size, random_state=random_state
     )
     
-    # Train model
-    model = HousePriceModel(model_type)
-    model.train(X_train, y_train)
+    # Initialize and train model
+    model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=10000, random_state=random_state)
+    model.fit(X_train, y_train)
     
-    # Evaluate
-    train_metrics = model.evaluate(X_train, y_train)
-    test_metrics = model.evaluate(X_test, y_test)
+    print("  Model trained successfully")
+    print(f"\n  Model Coefficients:")
+    
+    # Display feature importance
+    coef_df = pd.DataFrame({
+        'Feature': X.columns,
+        'Coefficient': model.coef_
+    }).sort_values('Coefficient', key=abs, ascending=False)
+    
+    print(coef_df.to_string(index=False))
+    print(f"\n  Intercept: {model.intercept_:.4f}")
     
     # Save artifacts
     os.makedirs('artifacts', exist_ok=True)
-    dump(model, 'artifacts/model.joblib')
+    dump(model, model_save_path)
     dump(scaler, 'artifacts/scaler.joblib')
     
-    return {
-        'model_type': model_type,
-        'train_metrics': train_metrics,
-        'test_metrics': test_metrics,
-        'feature_importance': model.get_feature_importance(),
-        'feature_names': X.columns.tolist()
-    }
+    print(f"\nArtifacts saved to {model_save_path} and artifacts/scaler.joblib")
+    
+    return model, scaler
 
 
-if __name__ == "__main__":
-    # Example usage
-    results = train_model('data/house_prices.csv', 'price', model_type='rf')
-    print("Training completed!")
-    print(f"Test R²: {results['test_metrics']['r2']:.4f}")
-    print(f"Test RMSE: {results['test_metrics']['rmse']:.4f}")
+def load_model(model_path: str = 'artifacts/model.joblib') -> Any:
+    """
+    Load trained model from disk.
+    
+    Args:
+        model_path: Path to saved model
+        
+    Returns:
+        Loaded model
+    """
+    return load(model_path)
+
+
+def load_scaler(scaler_path: str = 'artifacts/scaler.joblib') -> Any:
+    """
+    Load fitted scaler from disk.
+    
+    Args:
+        scaler_path: Path to saved scaler
+        
+    Returns:
+        Loaded scaler
+    """
+    return load(scaler_path)

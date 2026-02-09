@@ -1,81 +1,77 @@
 """
 Data preprocessing module for house price prediction.
-Handles cleaning, feature engineering, and data preparation.
+Contains functions for data cleaning, feature engineering, and scaling.
 """
 
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, LabelEncoder
-from typing import Tuple, List, Optional
-from src.data_loader import load_data
+from typing import Dict, Any, List, Tuple
 
 
-
-def handle_missing_values(df: pd.DataFrame, strategy: str = 'mean') -> pd.DataFrame:
+def handle_missing_values(data: pd.DataFrame, strategy: str = 'mean') -> pd.DataFrame:
     """
     Handle missing values in the dataset.
     
     Args:
-        df: Input DataFrame
-        strategy: Strategy for missing values ('mean', 'median', 'mode', 'drop')
+        data: Input DataFrame
+        strategy: Strategy for handling missing values ('mean', 'median', 'mode', 'drop')
         
     Returns:
         DataFrame with handled missing values
     """
-    df_clean = df.copy()
+    print(f"\nHandling missing values with strategy: {strategy}")
     
     if strategy == 'drop':
-        return df_clean.dropna()
-    
-    numeric_columns = df_clean.select_dtypes(include=[np.number]).columns
-    
-    if strategy in ['mean', 'median']:
-        for col in numeric_columns:
-            if df_clean[col].isnull().any():
-                fill_value = df_clean[col].mean() if strategy == 'mean' else df_clean[col].median()
-                df_clean[col].fillna(fill_value, inplace=True)
-    
-    return df_clean
+        # Drop rows with missing values
+        return data.dropna()
+    elif strategy in ['mean', 'median', 'mode']:
+        # Fill with specified strategy
+        return data.fillna(data.mean())
+    else:
+        # Default to mean
+        return data.fillna(data.mean())
 
 
-def encode_categorical_features(df: pd.DataFrame, columns: Optional[List[str]] = None) -> pd.DataFrame:
+def encode_categorical_features(data: pd.DataFrame, categorical_columns: List[str]) -> pd.DataFrame:
     """
-    Encode categorical features.
+    Encode categorical features using label encoding.
     
     Args:
-        df: Input DataFrame
-        columns: List of categorical columns to encode
+        data: Input DataFrame
+        categorical_columns: List of categorical column names
         
     Returns:
         DataFrame with encoded categorical features
     """
-    df_encoded = df.copy()
+    print(f"\nEncoding categorical features: {categorical_columns}")
     
-    if columns is None:
-        columns = df_encoded.select_dtypes(include=['object']).columns
+    data_encoded = data.copy()
     
-    for col in columns:
-        le = LabelEncoder()
-        df_encoded[col] = le.fit_transform(df_encoded[col].astype(str))
+    for column in categorical_columns:
+        if column in data_encoded.columns:
+            le = LabelEncoder()
+            data_encoded[column] = le.fit_transform(data_encoded[column])
+            print(f"  Encoded {column} with {len(le.classes_)} unique values")
     
-    return df_encoded
+    return data_encoded
 
 
-def scale_features(df: pd.DataFrame, target_column: str) -> Tuple[pd.DataFrame, StandardScaler]:
+def scale_features(data: pd.DataFrame, numerical_columns: List[str]) -> Tuple[pd.DataFrame, Any]:
     """
-    Scale numerical features.
+    Scale numerical features using StandardScaler.
     
     Args:
-        df: Input DataFrame
-        target_column: Name of target column (not to be scaled)
+        data: Input DataFrame
+        numerical_columns: List of numerical column names
         
     Returns:
-        Tuple of (scaled DataFrame, fitted scaler)
+        Tuple of (scaled_data, fitted_scaler)
     """
-    df_scaled = df.copy()
-    feature_columns = [col for col in df.columns if col != target_column]
+    print(f"\nScaling {len(numerical_columns)} numerical features")
     
     scaler = StandardScaler()
-    df_scaled[feature_columns] = scaler.fit_transform(df_scaled[feature_columns])
+    data_scaled = data.copy()
+    data_scaled[numerical_columns] = scaler.fit_transform(data[numerical_columns])
     
-    return df_scaled, scaler
+    return data_scaled, scaler

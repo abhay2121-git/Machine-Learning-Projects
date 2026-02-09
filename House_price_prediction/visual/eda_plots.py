@@ -1,172 +1,114 @@
 """
-Exploratory Data Analysis (EDA) plotting utilities for house price prediction.
+Exploratory Data Analysis module for house price prediction.
+Contains functions for creating insightful visualizations.
 """
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from typing import Optional, List
+from typing import Dict, Any, List, Optional
 
 
-def plot_distribution(df: pd.DataFrame, column: str, figsize: tuple = (10, 6)) -> None:
+def plot_feature_distributions(data: pd.DataFrame, target: pd.Series) -> None:
     """
-    Plot distribution of a numerical column.
+    Create distribution plots for all features.
     
     Args:
-        df: DataFrame
-        column: Column name to plot
-        figsize: Figure size
+        data: Feature DataFrame
+        target: Target variable (house prices)
     """
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
+    # Create figure with subplots
+    fig, axes = plt.subplots(2, 4, figsize=(16, 12))
+    fig.suptitle('Feature Distributions and Price Distribution', fontsize=16, fontweight='bold')
     
-    # Histogram
-    sns.histplot(df[column], kde=True, ax=ax1)
-    ax1.set_title(f'Distribution of {column}')
-    ax1.set_xlabel(column)
-    ax1.set_ylabel('Frequency')
-    
-    # Box plot
-    sns.boxplot(y=df[column], ax=ax2)
-    ax2.set_title(f'Box Plot of {column}')
-    ax2.set_ylabel(column)
+    # Plot distributions for each feature
+    for i, (feature, ax) in enumerate(zip(data.columns, axes.flatten())):
+        # Histogram for numerical features
+        if data[feature].dtype in ['int64', 'float64']:
+            ax.hist(data[feature], bins=30, alpha=0.7, edgecolor='black')
+            ax.set_title(f'{feature} Distribution')
+            ax.set_xlabel(feature)
+            ax.set_ylabel('Frequency')
+            ax.grid(True, alpha=0.3)
+        
+        # Box plot for categorical features
+        elif data[feature].dtype == 'object':
+            ax.boxplot(x=data[feature], y=target, ax=ax)
+            ax.set_title(f'{feature} vs Price')
+            ax.set_xlabel(feature)
+            ax.set_ylabel('Price ($100k)')
+            ax.grid(True, alpha=0.3)
     
     plt.tight_layout()
     plt.show()
 
 
-def plot_correlation_matrix(df: pd.DataFrame, figsize: tuple = (12, 8)) -> None:
+def plot_correlation_matrix(data: pd.DataFrame) -> None:
     """
-    Plot correlation matrix heatmap.
+    Create correlation matrix heatmap.
     
     Args:
-        df: DataFrame
-        figsize: Figure size
+        data: Feature DataFrame
     """
-    # Select only numeric columns
-    numeric_df = df.select_dtypes(include=[np.number])
+    plt.figure(figsize=(12, 10))
     
     # Calculate correlation matrix
-    corr_matrix = numeric_df.corr()
+    corr_matrix = data.corr()
     
     # Create heatmap
-    plt.figure(figsize=figsize)
-    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=0, 
-                square=True, fmt='.2f', cbar_kws={'shrink': 0.8})
-    plt.title('Correlation Matrix')
+    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=True,
+                square=True, fmt='.2f')
+    plt.title('Feature Correlation Matrix')
     plt.tight_layout()
     plt.show()
 
 
-def plot_scatter(df: pd.DataFrame, x_col: str, y_col: str, 
-                hue: Optional[str] = None, figsize: tuple = (10, 6)) -> None:
+def plot_geographical_distribution(data: pd.DataFrame, target: pd.Series) -> None:
     """
-    Plot scatter plot between two numerical columns.
+    Create geographical scatter plot of house prices.
     
     Args:
-        df: DataFrame
-        x_col: X-axis column
-        y_col: Y-axis column
-        hue: Column for color coding (optional)
-        figsize: Figure size
+        data: Feature DataFrame with longitude and latitude
+        target: House prices
     """
-    plt.figure(figsize=figsize)
-    sns.scatterplot(data=df, x=x_col, y=y_col, hue=hue, alpha=0.6)
-    plt.title(f'{y_col} vs {x_col}')
-    plt.xlabel(x_col)
-    plt.ylabel(y_col)
+    plt.figure(figsize=(12, 8))
+    
+    # Create scatter plot
+    scatter = plt.scatter(data['Longitude'], data['Latitude'], 
+                           c=data['MedInc'], s=data['Population'],
+                           cmap='viridis', alpha=0.6)
+    
+    plt.colorbar(scatter, label='Median Income')
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    plt.title('Geographical Distribution of House Prices')
     plt.grid(True, alpha=0.3)
-    plt.show()
-
-
-def plot_categorical_analysis(df: pd.DataFrame, cat_col: str, 
-                            target_col: str, figsize: tuple = (12, 6)) -> None:
-    """
-    Plot categorical variable analysis against target.
-    
-    Args:
-        df: DataFrame
-        cat_col: Categorical column
-        target_col: Target numerical column
-        figsize: Figure size
-    """
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
-    
-    # Count plot
-    df[cat_col].value_counts().plot(kind='bar', ax=ax1)
-    ax1.set_title(f'Distribution of {cat_col}')
-    ax1.set_xlabel(cat_col)
-    ax1.set_ylabel('Count')
-    ax1.tick_params(axis='x', rotation=45)
-    
-    # Box plot by category
-    sns.boxplot(data=df, x=cat_col, y=target_col, ax=ax2)
-    ax2.set_title(f'{target_col} by {cat_col}')
-    ax2.set_xlabel(cat_col)
-    ax2.set_ylabel(target_col)
-    ax2.tick_params(axis='x', rotation=45)
     
     plt.tight_layout()
     plt.show()
 
 
-def plot_missing_values(df: pd.DataFrame, figsize: tuple = (12, 6)) -> None:
+def plot_price_vs_features(data: pd.DataFrame, target: pd.Series) -> None:
     """
-    Plot missing values heatmap.
+    Create plots showing relationship between price and key features.
     
     Args:
-        df: DataFrame
-        figsize: Figure size
+        data: Feature DataFrame
+        target: House prices
     """
-    missing_data = df.isnull().sum().sort_values(ascending=False)
-    missing_data = missing_data[missing_data > 0]
+    # Select key features for plotting
+    key_features = ['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms']
     
-    if len(missing_data) == 0:
-        print("No missing values found!")
-        return
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    fig.suptitle('House Price vs Key Features', fontsize=16, fontweight='bold')
     
-    plt.figure(figsize=figsize)
-    sns.barplot(x=missing_data.index, y=missing_data.values)
-    plt.title('Missing Values by Column')
-    plt.xlabel('Columns')
-    plt.ylabel('Number of Missing Values')
-    plt.xticks(rotation=45)
+    for i, (feature, ax) in enumerate(zip(key_features, axes.flatten())):
+        ax.scatter(data[feature], target, alpha=0.5)
+        ax.set_xlabel(feature)
+        ax.set_ylabel('Price ($100k)')
+        ax.set_title(f'Price vs {feature}')
+        ax.grid(True, alpha=0.3)
+    
     plt.tight_layout()
     plt.show()
-
-
-def generate_eda_report(df: pd.DataFrame, target_column: str) -> None:
-    """
-    Generate comprehensive EDA report.
-    
-    Args:
-        df: DataFrame
-        target_column: Target column name
-    """
-    print("=== EDA Report ===")
-    print(f"Dataset Shape: {df.shape}")
-    print(f"Target Column: {target_column}")
-    print("\n")
-    
-    # Target distribution
-    plot_distribution(df, target_column)
-    
-    # Correlation matrix
-    plot_correlation_matrix(df)
-    
-    # Missing values
-    plot_missing_values(df)
-    
-    # Top correlations with target
-    numeric_df = df.select_dtypes(include=[np.number])
-    correlations = numeric_df.corr()[target_column].sort_values(ascending=False)
-    
-    print("Top correlations with target:")
-    print(correlations.head(10))
-
-
-if __name__ == "__main__":
-    # Example usage
-    # df = load_data('data/house_prices.csv')
-    # generate_eda_report(df, 'price')
-    print("EDA plotting utilities loaded successfully!")
