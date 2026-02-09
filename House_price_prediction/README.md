@@ -1,170 +1,96 @@
-<<<<<<< HEAD
-# Customer Shopping Data Analysis
+Machine Learning Projects 🚀
 
-This project performs end-to-end exploratory data analysis (EDA) on a real-world customer shopping dataset using Python.
+This repository contains a growing collection of Machine Learning projects focused on building strong fundamentals and practical understanding of core ML concepts. The projects in this repository are part of my structured learning journey in Machine Learning, with an emphasis on clarity, mathematical intuition, and real-world problem solving.
 
-## Tools & Libraries
-- NumPy
-- Pandas
-- Matplotlib
-- Seaborn
+Currently, the repository includes two end-to-end Machine Learning projects, covering exploratory data analysis and supervised learning. More projects will be added gradually as I progress further into advanced Machine Learning, Deep Learning, and Neural Networks.
 
-## Analysis Highlights
-- Statistical analysis of purchase behavior
-- Revenue and customer insights by category, gender, age group, and shopping mall
-- Monthly revenue trends
-- Outlier detection and distribution analysis
-- Correlation analysis between numerical features
+Each project follows a systematic workflow including data understanding, preprocessing, exploratory data analysis (EDA), feature engineering, model training, evaluation, and result interpretation.
 
-## Objective
-To strengthen core data analysis skills and demonstrate the ability to convert raw transactional data into meaningful business insights.
+📌 Current Projects
+1️⃣ Customer Shopping EDA
 
-## Visual Output
-All key insights are visualized using Matplotlib and Seaborn with a clean, structured layout.
-=======
-# House Price Prediction
+Description:
+This project focuses on exploratory data analysis of customer shopping behavior. The goal is to understand patterns, trends, and insights from transactional data using statistical analysis and visualizations. Various plots and aggregations are used to analyze customer demographics, purchasing habits, and spending behavior.
 
-A machine learning project for predicting house prices using various regression models.
+Key Concepts Used:
 
-## Project Structure
+Data Cleaning
 
-```
-house_price_prediction/
-│
-├── src/                    # Core ML modules
-│   ├── data_loader.py      # Data loading and inspection
-│   ├── preprocessing.py    # Data cleaning and preprocessing
-│   ├── model.py           # ML model definitions
-│   ├── train.py           # Training pipeline
-│   └── evaluate.py        # Model evaluation utilities
-│
-├── visual/                 # Visualization modules
-│   ├── eda_plots.py       # Exploratory data analysis plots
-│   └── model_plots.py     # Model evaluation plots
-│
-├── data/                   # Dataset files
-│   └── (add your dataset here)
-│
-├── artifacts/              # Trained models and scalers (auto-created)
-├── requirements.txt        # Python dependencies
-└── README.md              # This file
-```
+Exploratory Data Analysis (EDA)
 
-## Installation
+Statistical Analysis
 
-1. Clone or download this project
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+Data Visualization
 
-## Usage
+2️⃣ California House Price Prediction
 
-### 1. Prepare your data
-Place your dataset CSV file in the `data/` directory. The dataset should have:
-- Features columns (numerical and categorical)
-- A target column (house price)
+Description:
+This project implements a supervised machine learning model to predict house prices in California using the California Housing dataset. The project emphasizes understanding linear regression, feature relationships, and model evaluation metrics while working with a real-world dataset.
 
-### 2. Train the model
-```python
-from src.train import train_model
+Key Concepts Used:
 
-# Train a random forest model
-results = train_model(
-    data_path='data/your_dataset.csv',
-    target_column='price',  # Change to your target column name
-    model_type='rf'         # Options: 'linear', 'ridge', 'lasso', 'rf', 'gbm'
-)
+Feature Engineering
 
-print(f"Test R²: {results['test_metrics']['r2']:.4f}")
-print(f"Test RMSE: {results['test_metrics']['rmse']:.4f}")
-```
+Linear Regression
 
-### 3. Evaluate the model
-```python
-from src.evaluate import load_model, load_scaler, evaluate_model
-import pandas as pd
+Train-Test Split
 
-# Load trained artifacts
-model = load_model()
-scaler = load_scaler()
+Model Evaluation (RMSE, R²)
 
-# Load test data
-test_data = pd.read_csv('data/test.csv')
-X_test = test_data.drop(columns=['price'])
-y_test = test_data['price']
+🧠 Skills & Concepts Covered So Far
 
-# Evaluate
-metrics = evaluate_model(model, X_test, y_test)
-print(metrics)
-```
+Python for Machine Learning
 
-### 4. Visualize results
-```python
-from visual.eda_plots import generate_eda_report
-from visual.model_plots import plot_predictions_vs_actual
+NumPy and Pandas for data manipulation
 
-# EDA plots
-df = pd.read_csv('data/your_dataset.csv')
-generate_eda_report(df, 'price')
+Matplotlib and Seaborn for visualization
 
-# Model evaluation plots
-y_pred = model.predict(X_test)
-plot_predictions_vs_actual(y_test.values, y_pred)
-```
+Exploratory Data Analysis (EDA)
 
-## Available Models
+Supervised Learning (Regression)
 
-- **Linear Regression**: Simple baseline model
-- **Ridge Regression**: Linear regression with L2 regularization
-- **Lasso Regression**: Linear regression with L1 regularization
-- **Random Forest**: Ensemble decision tree model
-- **Gradient Boosting**: Boosted ensemble model
+Model evaluation and interpretation
 
-## Features
+🛠️ Tools & Technologies
 
-- **Modular Design**: Separate modules for data loading, preprocessing, modeling, and evaluation
-- **Multiple Models**: Support for various regression algorithms
-- **Comprehensive Evaluation**: MSE, RMSE, MAE, R² metrics
-- **Visualization**: EDA plots and model evaluation visualizations
-- **Artifact Management**: Automatic saving of trained models and scalers
+Programming Language: Python
 
-## File Descriptions
+Libraries:
 
-### Core Modules (`src/`)
+NumPy
 
-- **`data_loader.py`**: Handles CSV loading and basic data inspection
-- **`preprocessing.py`**: Missing value handling, categorical encoding, feature scaling
-- **`model.py`**: ML model wrapper with training, prediction, and evaluation methods
-- **`train.py`**: Complete training pipeline orchestrating all steps
-- **`evaluate.py`**: Model evaluation, residual analysis, and prediction utilities
+Pandas
 
-### Visualization (`visual/`)
+Matplotlib
 
-- **`eda_plots.py`**: Distribution plots, correlation matrices, missing value analysis
-- **`model_plots.py`**: Prediction vs actual plots, residual analysis, feature importance
+Seaborn
 
-## Getting Started
+Scikit-learn
 
-1. **Start with EDA**: Use `visual/eda_plots.py` to understand your data
-2. **Preprocess data**: The `src/preprocessing.py` module handles cleaning
-3. **Train models**: Use `src/train.py` to train different models
-4. **Evaluate performance**: Use `src/evaluate.py` and `visual/model_plots.py` for analysis
+Environment: Jupyter Notebook / Python Scripts
 
-## Best Practices Followed
+📂 Repository Structure
+├── customer_shopping_EDA/
+├── california_house_price_prediction/
+├── datasets/
+├── notebooks/
+├── scripts/
+└── README.md
 
-- ✅ **Separation of Concerns**: Clear separation between data, model, and visualization logic
-- ✅ **Modular Design**: Each file has a single responsibility
-- ✅ **Type Hints**: All functions include type annotations
-- ✅ **Documentation**: Comprehensive docstrings for all functions
-- ✅ **Artifact Management**: Models and preprocessors are saved for reproducibility
-- ✅ **Error Handling**: Proper validation and error messages
-- ✅ **Scalability**: Easy to add new models and preprocessing steps
+🚧 Work in Progress
 
-## Next Steps
+This repository is actively maintained. Additional projects will be added in the future, including:
 
-1. Add your dataset to the `data/` directory
-2. Start with exploratory data analysis using `visual/eda_plots.py`
-3. Train your first model using `src/train.py`
-4. Evaluate and visualize results using `src/evaluate.py` and `visual/model_plots.py`
->>>>>>> e69c50c5c5753df614752222e6aea10ce4c65410
+Classification problems (Logistic Regression, Decision Trees)
+
+Clustering and unsupervised learning
+
+Feature selection and optimization
+
+Deep Learning and Neural Networks
+
+Real-world ML case studies
+
+🎯 Goal
+
+The primary goal of this repository is to build a strong foundation in Machine Learning that enables a smooth transition into advanced topics such as Deep Learning, Neural Networks, and production-level ML systems.
