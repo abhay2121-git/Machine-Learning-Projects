@@ -12,7 +12,7 @@ from typing import Tuple, Dict
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
 
-def load_models() -> Tuple[object, object, object, object, object]:
+def load_models() -> Tuple[object, object, object, object]:
     """Load all trained models and preprocessors."""
     print("Loading trained models...")
     
@@ -25,8 +25,16 @@ def load_models() -> Tuple[object, object, object, object, object]:
     feature_selector = joblib.load("outputs/models/feature_selector.pkl")
     variance_selector = joblib.load("outputs/models/variance_selector.pkl")
     
+    # Load Naive Bayes specific scaler
+    try:
+        nb_scaler = joblib.load("outputs/models/naive_bayes_scaler.pkl")
+        print("Naive Bayes scaler loaded successfully!")
+    except:
+        nb_scaler = None
+        print("Warning: Naive Bayes scaler not found, using standard scaler")
+    
     print("Models loaded successfully!")
-    return nb_model, lr_model, scaler, feature_selector, variance_selector
+    return nb_model, lr_model, scaler, feature_selector, variance_selector, nb_scaler
 
 
 def get_feature_vocabulary() -> list:
@@ -142,7 +150,7 @@ def classify_email_text(text: str, model_type: str = "logistic") -> Tuple[str, f
         Tuple of (prediction, confidence)
     """
     # Load models
-    nb_model, lr_model, scaler, feature_selector, variance_selector = load_models()
+    nb_model, lr_model, scaler, feature_selector, variance_selector, nb_scaler = load_models()
     
     # Clean text
     cleaned_text = clean_text(text)
@@ -160,16 +168,36 @@ def classify_email_text(text: str, model_type: str = "logistic") -> Tuple[str, f
         print("Warning: No words from email found in model vocabulary!")
         return "Ham", 50.0  # Default to ham if no matches
     
-    # Preprocess features
+    # Preprocess features (same for both models)
     processed_features = preprocess_text_features(word_freq, feature_selector, variance_selector, scaler)
     
-    # Choose model
+    # Choose model and apply correct scaling
     if model_type.lower() == "naive":
         model = nb_model
-        # Naive Bayes needs absolute values
-        processed_features = np.abs(processed_features)
+        # Use Naive Bayes specific scaler if available
+        if nb_scaler is not None:
+            # Re-process features with Naive Bayes scaler
+            feature_array = np.zeros(len(vocabulary))
+            for word, count in word_freq.items():
+                if word in vocabulary:
+                    idx = vocabulary.index(word)
+                    feature_array[idx] = count
+            feature_array = feature_array.reshape(1, -1)
+            
+            # Apply feature selection
+            feature_array = feature_selector.transform(feature_array)
+            feature_array = variance_selector.transform(feature_array)
+            
+            # Apply Naive Bayes scaling (RobustScaler with shift)
+            processed_features = nb_scaler.transform(feature_array)
+            print("Using Naive Bayes RobustScaler preprocessing")
+        else:
+            # Fallback to standard preprocessing
+            processed_features = preprocess_text_features(word_freq, feature_selector, variance_selector, scaler)
+            print("Using standard preprocessing for Naive Bayes")
     else:
         model = lr_model
+        print("Using standard preprocessing for Logistic Regression")
     
     # Make prediction
     prediction = model.predict(processed_features)[0]

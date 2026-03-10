@@ -2,7 +2,7 @@
 Model definition module for house price prediction.
 Contains ML model classes and training utilities.
 """
-
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
