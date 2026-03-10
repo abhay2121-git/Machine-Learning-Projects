@@ -1,4 +1,4 @@
-![GitHub issue](https://img.shields.io/github/issues/abhay2121-git/Email_Spam_Classifier)
+![GitHub issues](https://img.shields.io/github/issues/abhay2121-git/Email_Spam_Classifier)
 
 # GitHub Setup Guide for Email Spam Classifier
 
