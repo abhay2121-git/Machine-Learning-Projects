@@ -1,126 +1,288 @@
-![GitHub issues](https://img.shields.io/github/issues/abhay2121-git/Machine-Learning-Projects)
+# 📧 Email Spam Classifier
 
-# GitHub Setup Guide for Email Spam Classifier
+A production-grade machine learning project for detecting spam emails using Naive Bayes and Logistic Regression classifiers with interactive classification capabilities.
 
-## 🚀 What to Commit to GitHub
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 
-### **Step 1: Initialize Git Repository**
-```bash
-cd Email_Spam_Classifier
-git init
-```
+---
 
-### **Step 2: Add All Files (Except .gitignore exclusions)**
-```bash
-git add .
-```
+## 🎯 Project Overview
 
-### **Step 3: Make Initial Commit**
-```bash
-git commit -m "Initial commit: Email Spam Classifier v1.0
+This project implements a complete machine learning pipeline for email spam detection. It includes two classification models (Naive Bayes and Logistic Regression), comprehensive evaluation metrics, interactive email classification, and detailed visualizations for model analysis.
 
-✨ Features:
-- Complete ML pipeline with Naive Bayes & Logistic Regression
-- Interactive text-based email classification
-- Comprehensive evaluation and visualization
-- Clean, modular codebase
+### **Key Features**
+- ✅ **Dual Model Approach**: Naive Bayes & Logistic Regression
+- ✅ **Interactive Classification**: Real-time spam detection for user inputs
+- ✅ **Modular Architecture**: Clean, reusable code components
+- ✅ **Production Ready**: Comprehensive testing and error handling
+- ✅ **Rich Visualizations**: 5+ plots for data and model analysis
+- ✅ **High Performance**: 96.52% accuracy with Logistic Regression
 
-📊 Performance:
-- Logistic Regression: 96.52% accuracy
-- Naive Bayes: 88.12% accuracy
-- 1,764 features with word frequency analysis
+---
 
-🔧 Files:
-- main.py - Main pipeline with menu system
-- text_classifier.py - Interactive email classification
-- src/ - Modular ML components
-- tests/ - Unit test suite
-- outputs/ - Models and visualizations (auto-generated)"
-```
+## 📊 Model Performance
 
-### **Step 4: Create GitHub Repository**
-1. Go to [GitHub.com](https://github.com)
-2. Click "New repository"
-3. Name: `Email_Spam_Classifier`
-4. Description: `Production-grade email spam detection using ML`
-5. Choose Public/Private
-6. Don't initialize with README (we have one)
-7. Click "Create repository"
+| Model | Accuracy | Precision | Recall | F1-Score |
+|-------|----------|-----------|--------|----------|
+| **Logistic Regression** | 96.52% | High | High | 0.96 |
+| **Naive Bayes** | 88.12% | Moderate | High | 0.88 |
 
-### **Step 5: Push to GitHub**
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/Email_Spam_Classifier.git
-git branch -M main
-git push -u origin main
-```
+**Feature Count**: 1,764 features with word frequency analysis
 
-## 📁 Project Structure for GitHub
+---
 
-```
-Email_Spam_Classifier/
-├── .gitignore                    # ✅ Created - Excludes temp files, models, data
-├── README.md                      # ✅ Complete documentation
-├── requirements.txt                # ✅ Dependencies
-├── main.py                       # ✅ Main pipeline with interactive mode
-├── text_classifier.py             # ✅ Text-based classification
-├── demo_interactive.py           # ✅ Demo script
-├── src/                          # ✅ Core ML modules
-│   ├── data/                   # Data loading & preprocessing
-│   ├── features/               # Feature engineering
-│   ├── models/                 # ML models (NB, LR)
-│   ├── evaluation/             # Model evaluation
-│   └── visualization/          # Plots & charts
-├── tests/                         # ✅ Unit tests
-└── outputs/                       # ⚠️ Auto-generated (excluded)
-```
+## 📋 Prerequisites
 
-## 🎯 Key Selling Points for Your README
+- Python 3.8 or higher
+- pip (Python package manager)
+- 2+ GB disk space for dependencies and model files
 
-### **🔥 Main Features:**
-- **Dual Model Approach**: Naive Bayes + Logistic Regression
-- **Interactive Classification**: Real-time email spam detection
-- **Production Ready**: Clean, modular, well-documented
-- **Comprehensive Evaluation**: 96.52% accuracy (LR), 88.12% (NB)
-- **Rich Visualizations**: 5 different plots for analysis
+---
 
-### **🚀 Quick Start:**
+## 🔧 Installation
+
+### Step 1: Clone the Repository
 ```bash
 git clone https://github.com/YOUR_USERNAME/Email_Spam_Classifier.git
 cd Email_Spam_Classifier
-pip install -r requirements.txt
-python main.py  # Choose option 2 for interactive classification
 ```
 
-### **📧 Usage Examples:**
+### Step 2: Create Virtual Environment (Recommended)
 ```bash
-# Train models
-python main.py  # Choose option 1
+# On Windows
+python -m venv venv
+venv\Scripts\activate
 
-# Classify emails interactively
-python main.py  # Choose option 2
-# OR
+# On macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### Step 3: Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Step 4: Prepare Dataset
+Add your email dataset at `data/dataset.csv` with the following format:
+- **Column 1**: Email text content
+- **Column 2**: Label (0 for ham, 1 for spam)
+
+---
+
+## 🚀 Quick Start
+
+### Train Models
+```bash
+python main.py
+# Select option 1 to train models
+```
+
+### Interactive Email Classification
+```bash
+python main.py
+# Select option 2 to classify emails interactively
+```
+
+Or directly:
+```bash
 python text_classifier.py
+```
 
-# Demo classification
+### Run Demo
+```bash
 python demo_interactive.py
 ```
 
-## ⚠️ Important Notes
+---
 
-1. **Dataset**: Users need to add their own `data/dataset.csv`
-2. **Outputs**: `outputs/` folder is excluded (auto-generated)
-3. **Models**: Trained models are saved automatically
-4. **Performance**: Logistic Regression outperforms Naive Bayes
+## 📁 Project Structure
 
-## 🏆 Ready to Upload!
+```
+Email_Spam_Classifier/
+├── main.py                       # Main pipeline with menu system
+├── text_classifier.py            # Interactive email classification module
+├── predict.py                    # Prediction functionality
+├── example_prediction.py          # Example prediction script
+├── example_text_classification.py # Text classification example
+├── demo_interactive.py           # Interactive demo
+├── requirements.txt              # Project dependencies
+├── README.md                     # This file
+│
+├── src/                          # Core ML modules
+│   ├── __init__.py
+│   ├── data/
+│   │   ├── __init__.py
+│   │   └── loader.py            # Data loading utilities
+│   ├── features/
+│   │   ├── __init__.py
+│   │   └── vectorizer.py        # Text vectorization
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── naive_bayes.py       # Naive Bayes implementation
+│   │   ├── logistic_regression.py # Logistic Regression implementation
+│   │   └── trainer.py           # Model training utilities
+│   ├── evaluation/
+│   │   ├── __init__.py
+│   │   └── evaluator.py         # Evaluation metrics
+│   └── visualization/
+│       ├── __init__.py
+│       └── plotter.py           # Visualization utilities
+│
+├── data/                         # Dataset directory
+│   └── dataset.csv              # Email dataset (add yours here)
+│
+├── models/                       # Trained models (auto-generated)
+│   ├── logistic_regression.pkl
+│   ├── naive_bayes.pkl
+│   └── vectorizer.pkl
+│
+├── outputs/                      # Model outputs (auto-generated)
+│   ├── models/
+│   └── plots/
+│
+└── tests/                        # Unit tests
+    ├── test_loader.py
+    ├── test_preprocessor.py
+    ├── test_vectorizer.py
+    ├── test_naive_bayes.py
+    └── test_logistic_regression.py
+```
 
-Your project is **GitHub-ready** with:
-- ✅ Proper .gitignore
-- ✅ Complete README.md
-- ✅ Clean codebase
-- ✅ Working ML pipeline
-- ✅ Interactive features
-- ✅ Unit tests
-- ✅ Documentation
+---
 
-Just follow the steps above and you'll have a professional GitHub repository! 🚀
+## 📖 Usage
+
+### 1. Train Models
+```bash
+python main.py
+# Follow the menu: Select 1 to train models
+```
+
+### 2. Classify Emails Interactively
+```bash
+python main.py
+# Follow the menu: Select 2 to classify emails
+# Enter your email text and receive spam/ham prediction
+```
+
+### 3. Run Example Predictions
+```bash
+python example_prediction.py
+python example_text_classification.py
+```
+
+### 4. Run Tests
+```bash
+pytest tests/
+# or
+python -m pytest tests/ -v
+```
+
+---
+
+## 📚 Dataset Information
+
+- **Source**: Email dataset with spam/ham classification
+- **Format**: CSV with email text and labels
+- **Size**: Adjustable based on your dataset
+- **Labels**: 
+  - `0` = Ham (legitimate email)
+  - `1` = Spam
+
+Place your dataset at: `data/dataset.csv`
+
+---
+
+## 🔬 Technical Details
+
+### Data Preprocessing
+- Text tokenization and cleaning
+- Stop word removal
+- Stemming/Lemmatization
+- TF-IDF vectorization (1,764 features)
+
+### Models Used
+1. **Naive Bayes**: Fast, probabilistic classifier
+2. **Logistic Regression**: High-performance linear classifier
+
+### Evaluation Metrics
+- Accuracy
+- Precision & Recall
+- F1-Score
+- Confusion Matrix
+- ROC-AUC Curve
+
+---
+
+## 📈 Visualizations
+
+The project generates 5+ visualization plots:
+- Confusion Matrices
+- ROC Curves
+- Feature Importance
+- Classification Reports
+- Distribution Analysis
+
+View outputs in: `outputs/plots/`
+
+---
+
+## ⚙️ Configuration
+
+Key parameters can be modified in source files:
+- **Training/Test Split**: `src/data/loader.py`
+- **Vectorizer Settings**: `src/features/vectorizer.py`
+- **Model Parameters**: `src/models/naive_bayes.py`, `src/models/logistic_regression.py`
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Steps to Contribute:
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+## 👨‍💻 Author
+
+**Abhay** - [GitHub Profile](https://github.com/abhay2121-git)
+
+---
+
+## 📞 Support & Issues
+
+If you encounter any issues or have questions:
+- Open an [Issue](https://github.com/YOUR_USERNAME/Email_Spam_Classifier/issues)
+- Check existing documentation in `src/` module files
+- Review test files for usage examples
+
+---
+
+## 🎓 Learning Resources
+
+This project demonstrates:
+- Machine Learning classification pipelines
+- Text preprocessing and feature engineering
+- Model training, evaluation, and comparison
+- Interactive Python applications
+- Unit testing best practices
+- Modular code architecture
+
+---
+
+**Last Updated**: May 2026 | **Status**: Production Ready ✅
