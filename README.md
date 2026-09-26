@@ -94,5 +94,3 @@ Real-world ML case studies
 🎯 Goal
 
 The primary goal of this repository is to build a strong foundation in Machine Learning that enables a smooth transition into advanced topics such as Deep Learning, Neural Networks, and production-level ML systems.
-
-
